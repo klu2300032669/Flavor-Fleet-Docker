@@ -1,0 +1,31 @@
+# Dockerfile.frontend
+FROM node:20 AS build
+
+WORKDIR /app
+
+# Install git
+RUN apt-get update && apt-get install -y git && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Clone frontend repository
+RUN git clone https://github.com/klu2300032669/Flavor-Fleet-Frontend.git .
+
+# Set WORKDIR to where package.json exists
+WORKDIR /app/hackpro
+
+# Install dependencies
+RUN npm install --legacy-peer-deps
+
+# Build frontend
+RUN npm run build
+
+# Stage 2: Serve with Nginx
+FROM nginx:alpine
+
+# Copy built files to Nginx html directory
+COPY --from=build /app/hackpro/dist /usr/share/nginx/html
+
+# Expose port
+EXPOSE 80
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]

@@ -1,0 +1,23 @@
+# Dockerfile.backend
+FROM openjdk:17-jdk-slim
+
+WORKDIR /app
+
+# Install git
+RUN apt-get update && apt-get install -y git && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Clone backend repository
+RUN git clone https://github.com/klu2300032669/Flavor-Fleet-Backend.git .
+
+# Make mvnw executable
+RUN chmod +x mvnw
+
+# Build backend
+RUN ./mvnw clean package -DskipTests \
+    && cp target/*.jar app.jar
+
+# Expose Spring Boot port
+EXPOSE 8885
+
+# Start the backend
+ENTRYPOINT ["java", "-jar", "app.jar"]
